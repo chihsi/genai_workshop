@@ -7,6 +7,8 @@
   --x: #f59e0b;
   --o: #10b981;
   --win: #f87171;
+  --line: #2a3a5c;
+  --radius: 10px;
 }
 
 * { box-sizing: border-box; }
@@ -108,16 +110,26 @@ h1 {
 .symbol-select {
   margin-bottom: 1em;
 }
+
 .symbol-select label {
   margin-right: 0.5em;
 }
+
 .stats {
   margin-top: 1em;
-  padding: 0.5em;
-  background: #f8f8f8;
-  border-radius: 6px;
+  padding: 1em;
+  background: color-mix(in oklab, var(--panel) 85%, #000 15%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
+
 .stats h2 {
   margin-top: 0;
   font-size: 1.1em;
+  color: var(--text);
+}
+
+.stats p {
+  margin: 0.5em 0;
+  color: var(--muted);
 }

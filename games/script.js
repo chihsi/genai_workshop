@@ -14,28 +14,21 @@ let currentPlayer = 0; // 0 or 1
 let board = Array(9).fill('');
 let gameActive = false;
 let timer = null;
-let timeLeft = 10;
-let undoUsed = [false, false]; // 每人每局限用一次
-let history = [];
+let timeLeft = 20; // 20秒計時器
 let stats = {
   total: 0,
   wins: [0, 0]
 };
 
-const LINES = [
-  [0,1,2],[3,4,5],[6,7,8], // 橫
-  [0,3,6],[1,4,7],[2,5,8], // 直
-  [0,4,8],[2,4,6]          // 斜
-];
-
-// 載入統計
 function loadStats() {
   const s = localStorage.getItem('ttt_stats');
   if (s) stats = JSON.parse(s);
 }
+
 function saveStats() {
   localStorage.setItem('ttt_stats', JSON.stringify(stats));
 }
+
 function updateStatsDisplay() {
   const statsDiv = document.getElementById('statsContent');
   const winRate = stats.total ? [
@@ -50,19 +43,19 @@ function updateStatsDisplay() {
 }
 
 function setBoardSymbols() {
-  document.querySelectorAll('.cell').forEach((cell, i) => {
-    cell.textContent = board[i];
-    cell.disabled = !gameActive || board[i];
-  });
+    document.querySelectorAll('.cell').forEach((cell, i) => {
+        cell.textContent = board[i];
+        cell.disabled = !gameActive || board[i];
+    });
 }
 
 function updateStatus(msg) {
-  document.getElementById('status').textContent = msg;
+    document.getElementById('status').textContent = msg;
 }
 
 function startTurnTimer() {
   clearInterval(timer);
-  timeLeft = 10;
+  timeLeft = 20;
   updateStatus(`目前玩家：${symbols[currentPlayer]}（剩餘 ${timeLeft} 秒）`);
   timer = setInterval(() => {
     timeLeft--;
@@ -75,24 +68,23 @@ function startTurnTimer() {
 }
 
 function startGame() {
-  symbols = SYMBOL_SETS[document.getElementById('symbolSet').value];
-  currentPlayer = 0;
-  board = Array(9).fill('');
-  gameActive = true;
-  undoUsed = [false, false];
-  history = [];
-  setBoardSymbols();
-  document.getElementById('undo').disabled = false;
-  document.getElementById('stats').style.display = 'none';
-  updateStatus(`目前玩家：${symbols[currentPlayer]}`);
-  startTurnTimer();
+    symbols = SYMBOL_SETS[document.getElementById('symbolSet').value];
+    currentPlayer = 0;
+    board = Array(9).fill('');
+    gameActive = true;
+    history = [];
+    undoUsed = [false, false];
+    setBoardSymbols();
+    document.getElementById('stats').style.display = 'none';
+    document.getElementById('undo').disabled = false;
+    updateStatus(`目前玩家：${symbols[currentPlayer]}`);
+    startTurnTimer();
 }
 
 function endGame(winner, reason) {
   gameActive = false;
   clearInterval(timer);
   document.querySelectorAll('.cell').forEach(cell => cell.disabled = true);
-  document.getElementById('undo').disabled = true;
   stats.total++;
   if (winner !== null) stats.wins[winner]++;
   saveStats();
@@ -119,33 +111,28 @@ function checkWinner() {
   return board.every(cell => cell) ? 'draw' : null;
 }
 
-// 棋盤點擊
-document.querySelectorAll('.cell').forEach((cell, idx) => {
-  cell.addEventListener('click', () => {
-    if (!gameActive || board[idx]) return;
-    board[idx] = symbols[currentPlayer];
-    history.push({ board: [...board], player: currentPlayer, undoUsed: [...undoUsed] });
-    setBoardSymbols();
-    const result = checkWinner();
-    if (result === symbols[0]) {
-      endGame(0);
-    } else if (result === symbols[1]) {
-      endGame(1);
-    } else if (result === 'draw') {
-      endGame(null);
-    } else {
-      undoUsed[currentPlayer] = false; // 新回合可用悔棋
-      currentPlayer = (currentPlayer + 1) % 2;
-      startTurnTimer();
-    }
-  });
-});
-
-// 重新開始
-resetBtn.addEventListener('click', startGame);
-
-// 開始遊戲（符號選擇）
+// 綁定按鈕事件
 document.getElementById('startGame').addEventListener('click', startGame);
+document.getElementById('reset').addEventListener('click', startGame);
+
+// 綁定棋盤點擊事件
+document.querySelectorAll('.cell').forEach((cell, idx) => {
+    cell.addEventListener('click', () => {
+        if (!gameActive || board[idx]) return;
+        board[idx] = symbols[currentPlayer];
+        history.push({ board: [...board], player: currentPlayer });
+        setBoardSymbols();
+        const result = checkWinner();
+        if (result) {
+            endGame(currentPlayer);
+        } else if (board.every(cell => cell)) {
+            endGame(null); // 平手
+        } else {
+            currentPlayer = (currentPlayer + 1) % 2;
+            startTurnTimer();
+        }
+    });
+});
 
 // 悔棋
 document.getElementById('undo').addEventListener('click', () => {
@@ -162,6 +149,19 @@ document.getElementById('undo').addEventListener('click', () => {
       startTurnTimer();
       document.getElementById('undo').disabled = true;
       setTimeout(() => {
+        if (gameActive) document.getElementById('undo').disabled = false;
+      }, 1000);
+      return;
+    }
+  }
+});
+
+// 初始載入
+loadStats();
+updateStatsDisplay();
+setBoardSymbols();
+document.getElementById('undo').disabled = true;
+document.getElementById('stats').style.display = 'block';
         if (gameActive) document.getElementById('undo').disabled = false;
       }, 1000);
       return;

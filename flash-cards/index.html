@@ -3,17 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台語單詞卡</title>
+    <title>智慧單字卡</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>台語單詞卡</h1>
+        <h1>智慧單字卡</h1>
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="study">學習模式</button>
+            <button class="mode-btn" data-mode="test">測驗模式</button>
+            <button class="mode-btn" data-mode="write">寫作練習</button>
+        </div>
         
         <div class="controls">
             <button id="prevCard">上一個</button>
             <span id="cardCount">1 / 5</span>
             <button id="nextCard">下一個</button>
+            <div class="progress-bar">
+                <div class="progress"></div>
+            </div>
         </div>
 
         <div class="flash-card">
@@ -27,6 +35,23 @@
                         <div class="definition"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="answer-section" style="display: none;">
+            <input type="text" id="userAnswer" placeholder="請輸入答案">
+            <button id="checkAnswer">檢查答案</button>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">已學習</span>
+                <span id="learnedCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">正確率</span>
+                <span id="accuracyRate">0%</span>
             </div>
         </div>
 
